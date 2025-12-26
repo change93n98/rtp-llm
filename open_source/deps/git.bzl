@@ -89,7 +89,7 @@ def git_deps():
         remote = "https://github.com/bazelbuild/rules_cc.git",
         commit = "1477dbab59b401daa94acedbeaefe79bf9112167",
     )
-
+    
     git_repository(
         name = "rules_python",
         remote = "https://github.com/bazelbuild/rules_python.git",

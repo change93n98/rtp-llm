@@ -118,18 +118,20 @@ ROCmDevice::ROCmDevice(const DeviceInitParams& params): DeviceBase(params) {
 
     ROCM_CHECK(hipblasCreate(&hipblas_handle_));
     ROCM_CHECK(hipblasLtCreate(&hipblaslt_handle_));
+    // # change(删除mmwarpper相关代码)
+    // hipblas_mm_wrapper_.reset(new hipblasMMWrapper(
+    //     hipblas_handle_, hipblaslt_handle_, stream_, allocator_ptr, init_params_.hw_kernel_config));
+    // hipblas_mm_wrapper_->setGemmConfig(
+    //     hipDataType::HIP_R_16F, hipDataType::HIP_R_16F, hipDataType::HIP_R_16F, hipDataType::HIP_R_32F);
 
-    hipblas_mm_wrapper_.reset(new hipblasMMWrapper(
-        hipblas_handle_, hipblaslt_handle_, stream_, allocator_ptr, init_params_.hw_kernel_config));
-    hipblas_mm_wrapper_->setGemmConfig(
-        hipDataType::HIP_R_16F, hipDataType::HIP_R_16F, hipDataType::HIP_R_16F, hipDataType::HIP_R_32F);
-
-    hipblas_mm_wrapper_->setStream(stream_);
-    fmha_runner_.reset(new rocmFmhaWrapper());
-    fmha_runner_->init(stream_);
+    // hipblas_mm_wrapper_->setStream(stream_);
+    // fmha_runner_.reset(new rocmFmhaWrapper());
+    // fmha_runner_->init(stream_);
     //moe_runner_.reset(new rocmMoeWrapper());
-    ck_gemm_runner_.reset(new rocmCKGemmWrapper());
-    ck_w8a8_gelu_gemm_runner_.reset(new rocmCKW8A8GeluGemmWrapper());
+    // # change(删除ckgemm相关代码)
+    // ck_gemm_runner_.reset(new rocmCKGemmWrapper());
+    // # change(删除ckw8a8gemm相关代码)
+    // ck_w8a8_gelu_gemm_runner_.reset(new rocmCKW8A8GeluGemmWrapper());
 
     // select mla type
     if (params.mla_ops_type != MlaOpsType::AUTO) {
@@ -144,7 +146,8 @@ ROCmDevice::~ROCmDevice() {
     if (origin_torch_hip_allocator_) {
         at::hip::HIPCachingAllocator::allocator.store(origin_torch_hip_allocator_);
     }
-    hipblas_mm_wrapper_.reset();
+    // # change(删除mmwarpper相关代码)
+    // hipblas_mm_wrapper_.reset();
     ROCM_CHECK(hipStreamDestroy(stream_));
     ROCM_CHECK(hipStreamDestroy(assist_stream_));
     ROCM_CHECK(hipblasDestroy(hipblas_handle_));

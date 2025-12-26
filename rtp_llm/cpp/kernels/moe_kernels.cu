@@ -118,16 +118,18 @@ __global__ void scatter_add_kernel(T const* src, int N, int K, int32_t const* in
     for (int i = 0; i < ELEM_PER_THREAD; ++i) {
         if (thread_idx + i < (size_t)N * K) {
 #if USING_ROCM
-#ifdef ENABLE_BF16
-            if constexpr (std::is_same<T, __nv_bfloat162>::value) {
-                unsafeAtomicAdd(reinterpret_cast<__hip_bfloat162*>(out) + new_idx + k + i,
-                                (__hip_bfloat162)src[thread_idx + i]);
-            } else {
-                unsafeAtomicAdd(out + new_idx + k + i, src[thread_idx + i]);
-            }
-#else
-            unsafeAtomicAdd(out + new_idx + k + i, src[thread_idx + i]);
-#endif
+// # change(删除hip中不支持的非安全原子加)
+// #ifdef ENABLE_BF16
+//             if constexpr (std::is_same<T, __nv_bfloat162>::value) {
+//                 unsafeAtomicAdd(reinterpret_cast<__hip_bfloat162*>(out) + new_idx + k + i,
+//                                 (__hip_bfloat162)src[thread_idx + i]);
+//             } else {
+//                 unsafeAtomicAdd(out + new_idx + k + i, src[thread_idx + i]);
+//             }
+// #else
+            // unsafeAtomicAdd(reinterpret_cast<float*>(out + new_idx + k + i), float(src[thread_idx + i]));
+            (void)0;
+// #endif
 #else
             atomicAdd(out + new_idx + k + i, src[thread_idx + i]);
 #endif

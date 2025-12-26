@@ -1,7 +1,8 @@
 #include "rocmFmhaWrapper.h"
-#include "mha_fwd.h"
-#include "ck_tile/host.hpp"
-#include "utils.hpp"
+// # change(删除编译时对ck的依赖)
+// #include "mha_fwd.h"
+// #include "ck_tile/host.hpp"
+// #include "utils.hpp"
 #include "rtp_llm/cpp/utils/Logger.h"
 
 // #include "aiter_meta/3rdparty/composable_kernel/example/ck_tile/01_fmha/mask.hpp"

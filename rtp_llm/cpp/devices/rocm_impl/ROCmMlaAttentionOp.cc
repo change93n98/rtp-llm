@@ -220,96 +220,97 @@ void ROCmDevice::mlaAbsorbAttention(const MlaAttentionModuleParams& params) {
 }
 
 AttentionModuleOutput ROCmDevice::mlaContextAttention(const MlaAttentionModuleParams& params) {
-    DevicePerfWrapper wrapper(this, "mlaContext_layer_%d", params.layer_id);
-    auto&             q         = params.q;
-    auto&             fused_qkv = params.fused_qkv;
+    // # change(删除rocm的mla实现)
+    // DevicePerfWrapper wrapper(this, "mlaContext_layer_%d", params.layer_id);
+    // auto&             q         = params.q;
+    // auto&             fused_qkv = params.fused_qkv;
 
-    auto const token_num     = q.shape()[0];
-    auto const head_num      = params.configs.head_num;
-    auto const nope_head_dim = params.configs.nope_head_dim;
-    auto const rope_head_dim = params.configs.rope_head_dim;
-    auto const v_head_dim    = params.configs.v_head_dim;
-    auto const nope_rope_dim = nope_head_dim + rope_head_dim;
-    auto const size_per_head = params.configs.size_per_head;
+    // auto const token_num     = q.shape()[0];
+    // auto const head_num      = params.configs.head_num;
+    // auto const nope_head_dim = params.configs.nope_head_dim;
+    // auto const rope_head_dim = params.configs.rope_head_dim;
+    // auto const v_head_dim    = params.configs.v_head_dim;
+    // auto const nope_rope_dim = nope_head_dim + rope_head_dim;
+    // auto const size_per_head = params.configs.size_per_head;
 
-    auto const batch_size = params.common.context_batch_size;
-    auto const seq_len    = params.common.context_max_seq_len;
+    // auto const batch_size = params.common.context_batch_size;
+    // auto const seq_len    = params.common.context_max_seq_len;
 
-    auto softmax_extra_scale = params.configs.softmax_extra_scale;
+    // auto softmax_extra_scale = params.configs.softmax_extra_scale;
 
-    mlaRotaryWriteKVCache({q,
-                           nullptr,
-                           fused_qkv,
-                           params.kv_offset,
-                           params.common.prefill_flash_infer_attn,
-                           params.common,
-                           params.weights,
-                           params.configs,
-                           params.qscheme});
-    writeCacheStore(params);
+    // mlaRotaryWriteKVCache({q,
+    //                        nullptr,
+    //                        fused_qkv,
+    //                        params.kv_offset,
+    //                        params.common.prefill_flash_infer_attn,
+    //                        params.common,
+    //                        params.weights,
+    //                        params.configs,
+    //                        params.qscheme});
+    // writeCacheStore(params);
 
-    auto split_result =
-        split({fused_qkv,
-               {(size_t)params.kv_offset, (size_t)params.configs.kv_lora_rank, (size_t)params.configs.rope_head_dim},
-               1});
-    auto kv_a   = split_result.outputs[1];
-    auto k_rope = split_result.outputs[2];
-    printBufferData(q, "q_after_rope");
-    printBufferData(*kv_a, "kv_a");
-    printBufferData(*k_rope, "k_rope");
+    // auto split_result =
+    //     split({fused_qkv,
+    //            {(size_t)params.kv_offset, (size_t)params.configs.kv_lora_rank, (size_t)params.configs.rope_head_dim},
+    //            1});
+    // auto kv_a   = split_result.outputs[1];
+    // auto k_rope = split_result.outputs[2];
+    // printBufferData(q, "q_after_rope");
+    // printBufferData(*kv_a, "kv_a");
+    // printBufferData(*k_rope, "k_rope");
 
-    auto datatype = fused_qkv.type();
-    auto qkv =
-        allocateBuffer({datatype, {token_num, head_num * nope_rope_dim * 3}, AllocationType::DEVICE}, {"mla_qkv"});
+    // auto datatype = fused_qkv.type();
+    // auto qkv =
+    //     allocateBuffer({datatype, {token_num, head_num * nope_rope_dim * 3}, AllocationType::DEVICE}, {"mla_qkv"});
 
-    auto k_nope = gemm(GemmParams(*kv_a, *(params.weights.k_nope_weight->kernel)));
-    auto v      = gemm(GemmParams(*kv_a, *(params.weights.v_weight->kernel)));
+    // auto k_nope = gemm(GemmParams(*kv_a, *(params.weights.k_nope_weight->kernel)));
+    // auto v      = gemm(GemmParams(*kv_a, *(params.weights.v_weight->kernel)));
 
-    printBufferData(*k_nope, "k_nope");
-    printBufferData(*v, "v");
+    // printBufferData(*k_nope, "k_nope");
+    // printBufferData(*v, "v");
 
-    DISPATCH_CUDA_FUNCTION_DATA_TYPE(datatype,
-                                     invokeMlaQKVMerge,
-                                     q.data(),
-                                     k_nope->data(),
-                                     k_rope->data(),
-                                     v->data(),
-                                     qkv->data(),
-                                     token_num,
-                                     head_num,
-                                     nope_head_dim,
-                                     rope_head_dim,
-                                     v_head_dim,
-                                     stream_);
+    // DISPATCH_CUDA_FUNCTION_DATA_TYPE(datatype,
+    //                                  invokeMlaQKVMerge,
+    //                                  q.data(),
+    //                                  k_nope->data(),
+    //                                  k_rope->data(),
+    //                                  v->data(),
+    //                                  qkv->data(),
+    //                                  token_num,
+    //                                  head_num,
+    //                                  nope_head_dim,
+    //                                  rope_head_dim,
+    //                                  v_head_dim,
+    //                                  stream_);
 
-    printBufferData(*qkv, "mla_qkv");
-    const size_t hidden_units = head_num * nope_rope_dim;
+    // printBufferData(*qkv, "mla_qkv");
+    // const size_t hidden_units = head_num * nope_rope_dim;
 
-    fmha_runner_->setup(
-        datatype, params.configs.mask_type, head_num, head_num, nope_rope_dim, params.configs.q_scaling);
+    // fmha_runner_->setup(
+    //     datatype, params.configs.mask_type, head_num, head_num, nope_rope_dim, params.configs.q_scaling);
 
-    auto lse_acc_buf = allocateBuffer({DataType::TYPE_FP32, {1, 1, 1, 1}, AllocationType::DEVICE}, {"lse_acc_buf"});
+    // auto lse_acc_buf = allocateBuffer({DataType::TYPE_FP32, {1, 1, 1, 1}, AllocationType::DEVICE}, {"lse_acc_buf"});
 
-    auto padded_qkv_output_t = allocateBuffer({datatype, {token_num, head_num * size_per_head}, AllocationType::DEVICE},
-                                              {"padded_qkv_output"});
+    // auto padded_qkv_output_t = allocateBuffer({datatype, {token_num, head_num * size_per_head}, AllocationType::DEVICE},
+    //                                           {"padded_qkv_output"});
 
-    fmha_runner_->runCKFmhaMLA(qkv->data(),
-                               qkv->dataWithOffset(hidden_units),
-                               qkv->dataWithOffset(hidden_units * 2),
-                               padded_qkv_output_t->data(),
-                               nullptr,  // buffer for store out softmax_lse, looks like not used by RTP
-                               batch_size,
-                               seq_len,
-                               softmax_extra_scale,
-                               // context_token_num,
-                               params.common.cu_seqlens->data(),
-                               params.common.cu_seqlens->data(),
-                               lse_acc_buf->data(),
-                               params.common.linear_bias_slopes ? params.common.linear_bias_slopes->data() : nullptr,
-                               nullptr);
-    auto qkv_output_reshaped = padded_qkv_output_t->reshape({token_num, params.configs.head_num, size_per_head});
-    auto sliced_buffer       = slice({qkv_output_reshaped, -1, 0, (int64_t)v_head_dim});
-    copy({*params.qkv_output, *sliced_buffer});
+    // fmha_runner_->runCKFmhaMLA(qkv->data(),
+    //                            qkv->dataWithOffset(hidden_units),
+    //                            qkv->dataWithOffset(hidden_units * 2),
+    //                            padded_qkv_output_t->data(),
+    //                            nullptr,  // buffer for store out softmax_lse, looks like not used by RTP
+    //                            batch_size,
+    //                            seq_len,
+    //                            softmax_extra_scale,
+    //                            // context_token_num,
+    //                            params.common.cu_seqlens->data(),
+    //                            params.common.cu_seqlens->data(),
+    //                            lse_acc_buf->data(),
+    //                            params.common.linear_bias_slopes ? params.common.linear_bias_slopes->data() : nullptr,
+    //                            nullptr);
+    // auto qkv_output_reshaped = padded_qkv_output_t->reshape({token_num, params.configs.head_num, size_per_head});
+    // auto sliced_buffer       = slice({qkv_output_reshaped, -1, 0, (int64_t)v_head_dim});
+    // copy({*params.qkv_output, *sliced_buffer});
 }
 
 }  // namespace rtp_llm

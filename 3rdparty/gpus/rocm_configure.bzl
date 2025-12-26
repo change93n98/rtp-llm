@@ -185,6 +185,8 @@ def _rocm_include_path(repository_ctx, rocm_config):
     # Add HIP-Clang headers
     print("rocm_config.rocm_toolkit_path: ", rocm_config.rocm_toolkit_path)
     inc_dirs.append(rocm_config.rocm_toolkit_path + "/llvm/lib/clang/17/include")
+    # change(添加dtk下面的clang头文件路径)
+    inc_dirs.append(rocm_config.rocm_toolkit_path + "/llvm/lib/clang/17.0.0/include")
     inc_dirs.append(rocm_config.rocm_toolkit_path + "/lib/llvm/lib/clang/18/include")
     inc_dirs.append(rocm_config.rocm_toolkit_path + "/lib/llvm/lib/clang/19/include")
 

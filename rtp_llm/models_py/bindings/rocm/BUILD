@@ -1,15 +1,19 @@
 load("//:def.bzl", "copts", "rocm_copts")
 load("//bazel:arch_select.bzl", "torch_deps")
 
+# change(去除gemm.cc编译)
 cc_library(
     name = "rocm_bindings",
     srcs = glob([
         "*.cc",
     ], exclude = [
         "RegisterRocmOps.cc",
+        "Gemm.cc"
     ]),
     hdrs = glob([
         "*.h",
+    ], exclude = [
+        # "Gemm.h"
     ]),
     copts = rocm_copts(),
     deps = torch_deps() + [

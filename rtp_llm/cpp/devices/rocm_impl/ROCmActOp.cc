@@ -5,7 +5,8 @@
 #include "rtp_llm/cpp/core/torch_utils/BufferTorchUtils.h"
 
 // aiter kernels
-#include "activation.h"
+// # change(删除activation的rocm实现)
+// #include "activation.h"
 // #include "aiter_meta/csrc/include/activation.h"
 
 using namespace std;
@@ -74,14 +75,14 @@ BufferPtr ROCmDevice::activation(const ActivationParams& params) {
     auto gate      = params.gate ? params.gate.value().get().data() : nullptr;
     auto gate_bias = params.gate_bias ? params.gate_bias.value().get().data() : nullptr;
     auto act_scale = params.act_scale ? params.act_scale.value().get().data() : nullptr;
-
+    // # change(删除aiter中算子调用)
     if (params.fuse_gate_up) {
         torch::Tensor gate_up_tensor = Buffer2torchTensor(*params.states, false);
         torch::Tensor output_tensor  = Buffer2torchTensor(*params.output_buffer, false);
         if (params.atype == ActivationType::Swiglu || params.atype == ActivationType::Silu) {
-            aiter::silu_and_mul(output_tensor, gate_up_tensor);
+            // aiter::silu_and_mul(output_tensor, gate_up_tensor);
         } else if (params.atype == ActivationType::Gelu) {
-            aiter::gelu_and_mul(output_tensor, gate_up_tensor);
+            // aiter::gelu_and_mul(output_tensor, gate_up_tensor);
         } else {
             throw OpException(OpErrorType::ERROR_UNIMPLEMENTED);
         }

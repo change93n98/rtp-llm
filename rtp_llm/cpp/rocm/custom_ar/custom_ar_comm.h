@@ -12,7 +12,8 @@
 #include "rtp_llm/cpp/utils/Logger.h"
 
 // aiter custom all reduce kernel
-#include "custom_all_reduce.h"
+// # change(删除通信头文件，使得可以编译过)
+// #include "custom_all_reduce.h"
 // #include "aiter_meta/csrc/include/custom_all_reduce.h"
 
 namespace rtp_llm {

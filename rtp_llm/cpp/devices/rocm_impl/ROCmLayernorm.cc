@@ -1,5 +1,6 @@
-#include "norm.h"
-#include "rmsnorm.h"
+// # change(删除nore和rmsnorm的头文件依赖)
+// #include "norm.h"
+// #include "rmsnorm.h"
 #include "rtp_llm/cpp/devices/rocm_impl/ROCmDevice.h"
 #include "rtp_llm/cpp/devices/rocm_impl/ROCmAllocator.h"
 #include "rtp_llm/cpp/core/TrackerAllocator.h"
@@ -233,17 +234,19 @@ LayernormOutput ROCmDevice::layernorm(const LayernormParams& params) {
                     RTP_LLM_CHECK_WITH_INFO(params.before_norm_output != norm_output, "input, output before/after norm cannot be the same");
                 }
                 auto residual_out_tensor = Buffer2torchTensor((params.before_norm_output == nullptr) ? params.input:params.before_norm_output, false);
-                layernorm2d_with_add(out_tensor, input_tensor, residual_in_tensor, residual_out_tensor, weight_tensor, beta_tensor, static_cast<double>(eps), bias_tensor);
+                // # change(删除rocm layaerrnorm_with_add接口调用)
+                // layernorm2d_with_add(out_tensor, input_tensor, residual_in_tensor, residual_out_tensor, weight_tensor, beta_tensor, static_cast<double>(eps), bias_tensor);
                 if (params.return_normed_output) {
                     copy({*torchTensor2Buffer(residual_out_tensor), *norm_output});
                 }
             }
             else
-            {
-                auto res_tensor = layernorm2d(input_tensor, weight_tensor, beta_tensor, static_cast<double>(eps), bias_tensor);
-                copy({*norm_output, *torchTensor2Buffer(res_tensor)});
-                if (params.return_normed_output) {
-                    copy({*params.before_norm_output, *torchTensor2Buffer(res_tensor)});
+            {   
+                // # change(删除rocm layaerrnorm接口调用)
+                // auto res_tensor = layernorm2d(input_tensor, weight_tensor, beta_tensor, static_cast<double>(eps), bias_tensor);
+                // copy({*norm_output, *torchTensor2Buffer(res_tensor)});
+                // if (params.return_normed_output) {
+                //     copy({*params.before_norm_output, *torchTensor2Buffer(res_tensor)});
                 }
             }
         }
@@ -258,23 +261,25 @@ LayernormOutput ROCmDevice::layernorm(const LayernormParams& params) {
                 {
                     auto residual_in_tensor = Buffer2torchTensor(params.residual1.value().get(), false);
                     auto residual_out_tensor = Buffer2torchTensor((params.before_norm_output == nullptr) ? params.input:params.before_norm_output, false);
-                    rmsnorm2d_with_add_dynamicquant(
-                        /*out=*/out_kernel_tensor,
-                        /*input=*/input_tensor,
-                        /*residual_in=*/residual_in_tensor,
-                        /*residual_out=*/residual_out_tensor,
-                        /*yscale=*/out_scale_tensor,
-                        /*weight=*/weight_tensor,
-                        /*epsilon=*/static_cast<double>(eps),
-                        /*use_model_sensitive_rmsnorm=*/0);
+                    // # change(删除rocm rmsnorm_with_add_dynamicquant接口调用)
+                    // rmsnorm2d_with_add_dynamicquant(
+                    //     /*out=*/out_kernel_tensor,
+                    //     /*input=*/input_tensor,
+                    //     /*residual_in=*/residual_in_tensor,
+                    //     /*residual_out=*/residual_out_tensor,
+                    //     /*yscale=*/out_scale_tensor,
+                    //     /*weight=*/weight_tensor,
+                    //     /*epsilon=*/static_cast<double>(eps),
+                    //     /*use_model_sensitive_rmsnorm=*/0);
                 } else {
-                    rmsnorm2d_with_dynamicquant(
-                        /*out=*/out_kernel_tensor,
-                        /*input=*/input_tensor,
-                        /*yscale=*/out_scale_tensor,
-                        /*weight=*/weight_tensor,
-                        /*epsilon=*/static_cast<double>(eps),
-                        /*use_model_sensitive_rmsnorm=*/0);
+                    // # change(删除rocm rmsnorm_dynamicquant接口调用)
+                    // rmsnorm2d_with_dynamicquant(
+                    //     /*out=*/out_kernel_tensor,
+                    //     /*input=*/input_tensor,
+                    //     /*yscale=*/out_scale_tensor,
+                    //     /*weight=*/weight_tensor,
+                    //     /*epsilon=*/static_cast<double>(eps),
+                    //     /*use_model_sensitive_rmsnorm=*/0);
                 }
             } else {
                 auto out_tensor = Buffer2torchTensor(norm_output, false);
@@ -282,7 +287,8 @@ LayernormOutput ROCmDevice::layernorm(const LayernormParams& params) {
                 {
                     auto residual_in_tensor = Buffer2torchTensor(params.residual1.value().get(), false);
                     auto residual_out_tensor = Buffer2torchTensor((params.before_norm_output == nullptr) ? params.input:params.before_norm_output, false);
-                    rmsnorm2d_with_add(out_tensor, input_tensor, residual_in_tensor, residual_out_tensor, weight_tensor, static_cast<double>(eps), 0);
+                    // # change(删除rocm rmsnorm_with_add接口调用)
+                    // rmsnorm2d_with_add(out_tensor, input_tensor, residual_in_tensor, residual_out_tensor, weight_tensor, static_cast<double>(eps), 0);
                 }
                 else
                 {

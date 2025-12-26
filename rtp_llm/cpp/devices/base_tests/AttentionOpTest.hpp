@@ -6,7 +6,8 @@
 #include "rtp_llm/cpp/cache/CacheConfig.h"
 
 #ifdef USING_ROCM
-#include "rtp_llm/cpp/devices/rocm_impl/aiterPA.h"
+// # change(删除aiterpa头文件)
+// #include "rtp_llm/cpp/devices/rocm_impl/aiterPA.h"
 #include "rtp_llm/cpp/config/StaticConfig.h"
 #endif
 

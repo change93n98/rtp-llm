@@ -171,7 +171,9 @@ class EmptyClass:
 frontend_mode = os.environ.get("ROLE_TYPE") == "FRONTEND"
 
 try:
-    import librtp_compute_ops
+    # change(删除rtp_compute_ops依赖)
+    # import librtp_compute_ops
+    pass
 except BaseException as e:
     if not frontend_mode:
         logging.info(f"Exception: {e}, traceback: {traceback.format_exc()}")

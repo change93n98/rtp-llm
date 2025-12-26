@@ -4,7 +4,8 @@
 #include "rtp_llm/cpp/kernels/rocm/quantization_rocm.h"
 #include "rtp_llm/cpp/core/torch_utils/BufferTorchUtils.h"
 #include "rtp_llm/cpp/devices/DeviceBase.h"
-#include "quant.h"
+// # change(删除rocm的quant头文件)
+// #include "quant.h"
 // #include "aiter_meta/csrc/include/quant.h"
 
 namespace rtp_llm {
@@ -71,15 +72,17 @@ BufferPtr ROCmDevice::quantize(const QuantizeParams& params) {
                 torch::Tensor scales_tensor  = Buffer2torchTensor(scales, false);
                 if (scales_tensor.dtype() != torch::kFloat) scales_tensor = scales_tensor.to(torch::kFloat);
                 if (params.static_scale_reciprocal.has_value()) {
-                    aiter::static_per_tensor_quant(
-                        /*out=*/kernel_tensor,
-                        /*input=*/input_tensor,
-                        /*scales=*/scales_tensor);
+                    // # change(删除aiter接口调用)
+                    // aiter::static_per_tensor_quant(
+                    //     /*out=*/kernel_tensor,
+                    //     /*input=*/input_tensor,
+                    //     /*scales=*/scales_tensor);
                 } else {
-                    aiter::dynamic_per_tensor_quant(
-                        /*out=*/kernel_tensor,
-                        /*input=*/input_tensor,
-                        /*scales=*/scales_tensor);
+                    // # change(删除aiter接口调用)
+                    // aiter::dynamic_per_tensor_quant(
+                    //     /*out=*/kernel_tensor,
+                    //     /*input=*/input_tensor,
+                    //     /*scales=*/scales_tensor);
                 }
 	        }
         } else if (params.qscheme == QScheme::Qfp8PerToken) {
@@ -98,11 +101,12 @@ BufferPtr ROCmDevice::quantize(const QuantizeParams& params) {
                 torch::Tensor scales_tensor = Buffer2torchTensor(scales, false);
 
                 // invoke aiter quant kernel
-                aiter::dynamic_per_token_scaled_quant(
-                    /*out=*/kernel_tensor,
-                    /*input=*/input_tensor,
-                    /*scales=*/scales_tensor,
-                    /*scale_ub=*/std::nullopt);
+                // # change(删除aiter接口调用)
+                // aiter::dynamic_per_token_scaled_quant(
+                //     /*out=*/kernel_tensor,
+                //     /*input=*/input_tensor,
+                //     /*scales=*/scales_tensor,
+                //     /*scale_ub=*/std::nullopt);
             }
         } else if (params.qscheme == QScheme::Qfp8PerTokenBlock) {
             ROCM_CHECK_VALUE((params.groupSize == 32 || params.groupSize == 64 || params.groupSize == 128),
@@ -125,14 +129,15 @@ BufferPtr ROCmDevice::quantize(const QuantizeParams& params) {
                     input_tensor.view({(int)num_token, (int)model_dim / (int)block_scale_k, (int)block_scale_k});
 
                 // invoke aiter quant kernel
-                aiter::dynamic_per_token_scaled_quant(
-                    /*out=*/kernel_tensor,
-                    /*input=*/input_tensor,
-                    /*scales=*/scales_tensor,
-                    /*scale_ub=*/std::nullopt,
-                    /*shuffle_case=*/false,
-                    /*num_rows=*/std::nullopt,
-                    /*num_rows_factor*/1);
+                // # change(删除aiter接口调用)
+                // aiter::dynamic_per_token_scaled_quant(
+                //     /*out=*/kernel_tensor,
+                //     /*input=*/input_tensor,
+                //     /*scales=*/scales_tensor,
+                //     /*scale_ub=*/std::nullopt,
+                //     /*shuffle_case=*/false,
+                //     /*num_rows=*/std::nullopt,
+                //     /*num_rows_factor*/1);
             }
         } else {
             ROCM_FAIL("other quantize not implemented");

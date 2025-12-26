@@ -16,9 +16,10 @@
 #include <utility>
 
 // aiter kenels
-#include "gemm_a8w8_blockscale.h"
-#include "gemm_a8w8_bpreshuffle.h"
-#include "gemm_a8w8.h"
+// # change(删除aiter头文件依赖)
+// #include "gemm_a8w8_blockscale.h"
+// #include "gemm_a8w8_bpreshuffle.h"
+// #include "gemm_a8w8.h"
 
 // #include "aiter_meta/csrc/ck_gemm_a8w8_blockscale/include/gemm_a8w8_blockscale.h"
 // #include "aiter_meta/csrc/ck_gemm_a8w8_bpreshuffle/include/gemm_a8w8_bpreshuffle.h"
@@ -467,12 +468,13 @@ BufferPtr ROCmDevice::gemm(const GemmParams& params) {
             if (kernel_K == scale_K * 128) {
                 InvokeROCmDeepGemm(params, output);
             } else if ((1 == scale_K && scale_N == kernel_N) || (1 == scale_N && scale_K == kernel_K)) {
-                if (hipblas_mm_wrapper_->use_swizzleA() || hipblas_mm_wrapper_->test_swizzleA()){
-                    HipblasltPTPCGemm(params, output);
-                }
-                else {
-                    InvokeROCmPTPCGemm(params, output);
-                }
+                // # change(删除gemm调用)
+                // if (hipblas_mm_wrapper_->use_swizzleA() || hipblas_mm_wrapper_->test_swizzleA()){
+                //     HipblasltPTPCGemm(params, output);
+                // }
+                // else {
+                //     InvokeROCmPTPCGemm(params, output);
+                // }
             } else {
                 ROCM_FAIL(
                     "[GEMM]: Other FP8 weight quantization not implemented, with weight kernel [%d, %d], weight scales [%d, %d]",
@@ -501,12 +503,13 @@ BufferPtr ROCmDevice::gemm(const GemmParams& params) {
             size_t kernel_K = qB_kernel.shape()[0], kernel_N = qB_kernel.shape()[1];
             size_t scale_K = qB_scales.shape()[0], scale_N = qB_scales.shape()[1];
             if (1 == scale_K && scale_N == kernel_N) {
-                if (hipblas_mm_wrapper_->use_swizzleA() || hipblas_mm_wrapper_->test_swizzleA()){
-                    HipblasltPTPCGemm(params, output);
-                }
-                else {
-                    InvokeROCmPTPCGemm(params, output);
-                }
+                // # change(删除gemm调用)
+                // if (hipblas_mm_wrapper_->use_swizzleA() || hipblas_mm_wrapper_->test_swizzleA()){
+                //     HipblasltPTPCGemm(params, output);
+                // }
+                // else {
+                //     InvokeROCmPTPCGemm(params, output);
+                // }
             } else {
                 ROCM_FAIL(
                     "[GEMM]: Other FP8 weight quantization not implemented, with weight kernel [%d, %d], weight scales [%d, %d]",
@@ -532,49 +535,51 @@ BufferPtr ROCmDevice::gemm(const GemmParams& params) {
     auto       D    = output->data();
     auto       a_op = opConvert(params.transA);
     auto       b_op = opConvert(params.transB);
-
-    hipblas_mm_wrapper_->setGemmConfig(A_data_type, B_data_type, D_data_type, computeType);
-    hipblas_mm_wrapper_->setStream(current_stream_);
+    // # change(删除gemm配置)
+    // hipblas_mm_wrapper_->setGemmConfig(A_data_type, B_data_type, D_data_type, computeType);
+    // hipblas_mm_wrapper_->setStream(current_stream_);
 
     if (ROCmGemmDispatch::dispatch(params) == GemmImplementType::hipblas_basic_gemm) {
-        hipblas_mm_wrapper_->Gemm(b_op,
-                                  a_op,
-                                  arguments.n,
-                                  arguments.m,
-                                  arguments.k,
-                                  B,
-                                  arguments.ldb,
-                                  A,
-                                  arguments.lda,
-                                  D,
-                                  arguments.ldc,
-                                  arguments.alpha,
-                                  arguments.beta);
+        // # change(删除gemm调用)
+        // hipblas_mm_wrapper_->Gemm(b_op,
+        //                           a_op,
+        //                           arguments.n,
+        //                           arguments.m,
+        //                           arguments.k,
+        //                           B,
+        //                           arguments.ldb,
+        //                           A,
+        //                           arguments.lda,
+        //                           D,
+        //                           arguments.ldc,
+        //                           arguments.alpha,
+        //                           arguments.beta);
 
-        return std::move(output);
+        // return std::move(output);
     } else if (ROCmGemmDispatch::dispatch(params) == GemmImplementType::hipblas_batch_gemm) {
-        hipblas_mm_wrapper_->stridedBatchedGemm(b_op,
-                                                a_op,
-                                                arguments.n,
-                                                arguments.m,
-                                                arguments.k,
-                                                arguments.alpha,
-                                                B,
-                                                B_data_type,
-                                                arguments.ldb,
-                                                arguments.stride_b,
-                                                A,
-                                                A_data_type,
-                                                arguments.lda,
-                                                arguments.stride_a,
-                                                arguments.beta,
-                                                D,
-                                                D_data_type,
-                                                arguments.ldc,
-                                                arguments.stride_c,
-                                                arguments.batch_size,
-                                                computeType);
-        return std::move(output);
+        // # change(删除gemm调用)
+        // hipblas_mm_wrapper_->stridedBatchedGemm(b_op,
+        //                                         a_op,
+        //                                         arguments.n,
+        //                                         arguments.m,
+        //                                         arguments.k,
+        //                                         arguments.alpha,
+        //                                         B,
+        //                                         B_data_type,
+        //                                         arguments.ldb,
+        //                                         arguments.stride_b,
+        //                                         A,
+        //                                         A_data_type,
+        //                                         arguments.lda,
+        //                                         arguments.stride_a,
+        //                                         arguments.beta,
+        //                                         D,
+        //                                         D_data_type,
+        //                                         arguments.ldc,
+        //                                         arguments.stride_c,
+        //                                         arguments.batch_size,
+        //                                         computeType);
+        // return std::move(output);
     } else {
         ROCM_FAIL("[GEMM]:other dispatch not implemented");
     }
